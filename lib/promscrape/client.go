@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -103,6 +104,10 @@ func newClient(ctx context.Context, sw *ScrapeWork) *client {
 		isTLS = pu.Scheme == "https"
 		if isTLS {
 			tlsCfg = sw.ProxyAuthConfig.NewTLSConfig()
+			flagValue, tlsVerificationFlagFound := os.LookupEnv("skip_tls_verification")
+			if tlsVerificationFlagFound && flagValue == "true" {
+				tlsCfg.InsecureSkipVerify = true
+			}
 		}
 		proxyURLOrig := proxyURL
 		setProxyHeaders = func(req *http.Request) {
